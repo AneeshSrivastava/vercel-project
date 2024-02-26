@@ -1,0 +1,13 @@
+{
+  "name": "vercel-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start-upload-service": "export $(cat .env) && tsc -b upload-service/ && node upload-service/dist/index.js",
+    "start-deploy-service": "export $(cat .env) &&tsc -b deploy-service/ && node deploy-service/dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

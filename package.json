@@ -9,5 +9,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/types": "^3.523.0",
+    "@types/filesystem": "^0.0.35"
+  }
 }

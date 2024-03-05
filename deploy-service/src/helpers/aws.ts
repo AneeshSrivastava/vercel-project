@@ -6,14 +6,14 @@ import {
 import path from 'path';
 import fs from 'fs';
 import { config } from '../config';
-import { Readable } from 'stream';
-import { pipeline } from 'stream/promises';
+import { Readable, pipeline } from 'stream';
+import { NodeJsClient } from '@smithy/types';
 const client = new S3Client({
     credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
     }
-});
+}) as NodeJsClient<S3Client>;
 
 const listObjectsInS3ByPrefix = async (prefixPath: string) => {
     const listObjCommandInput = {
@@ -33,7 +33,6 @@ const downloadS3Folder = async (pathToFolder: string) => {
             objectsToDownload.map(async (object) => {
                 try {
                     if (!object.Key) throw new Error('Key not found');
-
                     const { Body } = await getS3ObjectByPrefix(object.Key);
                     if (!(Body instanceof Readable))
                         throw new Error('Body not readable');
@@ -43,11 +42,15 @@ const downloadS3Folder = async (pathToFolder: string) => {
                         '../',
                         object.Key
                     );
+                    const writeStream = fs.createWriteStream(
+                        localOutputDir,
+                        'utf8'
+                    );
                     const dirName = path.dirname(localOutputDir);
                     if (!fs.existsSync(dirName)) {
                         fs.mkdirSync(dirName, { recursive: true });
                     }
-                    await pipeline(Body, fs.createWriteStream(localOutputDir));
+                    await Body.pipe(writeStream);
                     return true;
                 } catch (error) {
                     console.error('Error downloading', object.Key, error);

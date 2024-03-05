@@ -1,5 +1,6 @@
 import { createClient, commandOptions } from 'redis';
 import { downloadS3Folder } from './helpers/aws';
+import { buildProject } from './helpers/build';
 
 const subscriber = createClient();
 subscriber.connect();
@@ -11,15 +12,17 @@ async function main() {
             'build-queue',
             0
         );
-        console.log(`Received ${response?.key} input as: ${response?.element}`);
-        const isFolderDownloaded = await downloadS3Folder(
-            `output/${response?.element}`
-        );
+        const id = response?.element!;
+
+        console.log(`Received ${response?.key} input as: ${id}`);
+        const isFolderDownloaded = await downloadS3Folder(`output/${id}`);
         if (isFolderDownloaded) {
             console.log('Download Completed.');
         } else {
             console.error('Could not download the folder');
         }
+        console.log('Starting to build the project...');
+        await buildProject(id);
     }
 }
 

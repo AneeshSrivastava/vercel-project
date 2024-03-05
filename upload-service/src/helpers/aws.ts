@@ -5,28 +5,29 @@ import {
     DeleteObjectCommand,
     ListObjectsV2Command
 } from '@aws-sdk/client-s3';
+import fs from 'fs';
 
 const initializeS3Client = async () => {
-    try{
-        return  new S3Client({
-        credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
-        }
-    });
-    }catch(error){
-        console.log("Cannot initialize client")
-        return Promise.reject("Cannot initialize client")
+    try {
+        return new S3Client({
+            credentials: {
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
+            }
+        });
+    } catch (error) {
+        console.log('Cannot initialize client');
+        return Promise.reject('Cannot initialize client');
     }
-}
+};
 
-const client = initializeS3Client()
+const client = initializeS3Client();
 
 const listBuckets = async (): Promise<string[]> => {
     try {
         let bucketNames: string[] = [];
         const command = new ListBucketsCommand({});
-        const awsClient  = await client
+        const awsClient = await client;
         const { Buckets } = await awsClient.send(command);
         if (Buckets) {
             for (const bucket of Buckets) {
@@ -47,15 +48,15 @@ const uploadToS3 = async (
 ) => {
     try {
         const s3UploadCommand = new PutObjectCommand({
-            Body: pathToLocalFile,
+            Body: fs.createReadStream(pathToLocalFile),
             Key: pathInS3,
             Bucket: bucketName
         });
-        const awsClient  = await client
+        const awsClient = await client;
         await awsClient.send(s3UploadCommand);
     } catch (error) {
         console.error('Cannot upload file: ', error);
-        return Promise.reject("Failed to upload")
+        return Promise.reject('Failed to upload');
     }
 };
 
@@ -66,7 +67,7 @@ const deleteObjectInS3 = async (bucketName: string, pathInS3: string) => {
             Key: pathInS3
         };
         const deleteFile = new DeleteObjectCommand(cleanupInput);
-        const awsClient  = await client
+        const awsClient = await client;
         await awsClient.send(deleteFile);
         console.log(`Deleted file: ${deleteFile.input.Key}`);
     } catch (error) {
@@ -80,7 +81,7 @@ const listFilesInS3Bucket = async (bucketName: string) => {
             Bucket: bucketName
         };
         const listObjCommand = new ListObjectsV2Command(inputCommandObj);
-        const awsClient  = await client
+        const awsClient = await client;
         const files = await awsClient.send(listObjCommand);
         if (!files.Contents) {
             console.log('No files found for cleanup');

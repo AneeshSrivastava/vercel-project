@@ -1,7 +1,8 @@
 import {
     S3Client,
     GetObjectCommand,
-    ListObjectsCommand
+    ListObjectsCommand,
+    PutObjectCommand
 } from '@aws-sdk/client-s3';
 import path from 'path';
 import fs from 'fs';
@@ -78,4 +79,24 @@ const getS3ObjectByPrefix = async (prefixPath: string) => {
     const response = client.send(getObjCommand);
     return response;
 };
-export { downloadS3Folder };
+
+const uploadToS3 = async (
+    bucketName: string,
+    pathToLocalFile: string,
+    pathInS3: string
+) => {
+    try {
+        const s3UploadCommand = new PutObjectCommand({
+            Body: fs.createReadStream(pathToLocalFile),
+            Key: pathInS3,
+            Bucket: bucketName
+        });
+        const awsClient = await client;
+        await awsClient.send(s3UploadCommand);
+    } catch (error) {
+        console.error('Cannot upload file: ', error);
+        return Promise.reject('Failed to upload');
+    }
+};
+
+export { downloadS3Folder, uploadToS3 };

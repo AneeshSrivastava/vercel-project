@@ -15,6 +15,7 @@ export const buildProject = (id: string): Promise<unknown> => {
             console.log('stderr: ' + data);
         });
         child.on('close', function (code) {
+            console.log('Build completed.');
             resolve('');
         });
     });

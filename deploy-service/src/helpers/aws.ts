@@ -9,6 +9,7 @@ import fs from 'fs';
 import { config } from '../config';
 import { Readable, pipeline } from 'stream';
 import { NodeJsClient } from '@smithy/types';
+import { checkPrimeSync } from 'crypto';
 const client = new S3Client({
     credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
@@ -35,9 +36,9 @@ const downloadS3Folder = async (pathToFolder: string) => {
                 try {
                     if (!object.Key) throw new Error('Key not found');
                     const { Body } = await getS3ObjectByPrefix(object.Key);
+                    console.log('Downloading : ', object.Key);
                     if (!(Body instanceof Readable))
                         throw new Error('Body not readable');
-                    // Create local Dir (if not exists)
                     const localOutputDir = path.join(
                         __dirname,
                         '../',
@@ -47,11 +48,13 @@ const downloadS3Folder = async (pathToFolder: string) => {
                         localOutputDir,
                         'utf8'
                     );
+                    // Create local Dir (if not exists)
                     const dirName = path.dirname(localOutputDir);
                     if (!fs.existsSync(dirName)) {
                         fs.mkdirSync(dirName, { recursive: true });
                     }
                     await Body.pipe(writeStream);
+                    console.log('Downloaded : ', object.Key);
                     return true;
                 } catch (error) {
                     console.error('Error downloading', object.Key, error);

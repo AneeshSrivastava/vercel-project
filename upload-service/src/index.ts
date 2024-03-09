@@ -11,6 +11,9 @@ import { createClient } from 'redis';
 const publisher = createClient();
 publisher.connect();
 
+const subscriber = createClient();
+subscriber.connect();
+
 const app = express();
 app.use(cors());
 
@@ -49,6 +52,14 @@ app.delete('/cleanup', async (req, resp) => {
             message: 'Failed while processing cleanup API endpoint'
         });
     }
+});
+
+app.get('/status', async (req, res) => {
+    const id = req.query.id;
+    const statusResponse = await subscriber.hGet('status', id as string);
+    res.json({
+        statusResponse
+    });
 });
 
 console.log('Server Started!');

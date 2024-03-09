@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start-upload-service": "export $(cat .env) && tsc -b upload-service/ && node upload-service/dist/index.js",
-    "start-deploy-service": "export $(cat .env) &&tsc -b deploy-service/ && node deploy-service/dist/index.js"
+    "start-deploy-service": "export $(cat .env) && tsc -b deploy-service/ && node deploy-service/dist/index.js",
+    "start-request-service": "export $(cat .env) && tsc -b request-handler/ && node request-handler/dist/index.js"
   },
   "keywords": [],
   "author": "",

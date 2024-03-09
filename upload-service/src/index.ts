@@ -28,9 +28,11 @@ app.post('/deploy', async (req, resp) => {
         await simpleGit().clone(repoUrl, repoPath);
         const files = getAllPaths(repoPath);
         await uploadFilesToS3(files);
-        publisher.lPush('build-queue', id);
+        // Sleep for upload service to finish upload
+        await sleep(2000);
         console.log(`Pushed '${id}' to redis`);
         publisher.hSet('status', id, 'uploaded');
+        publisher.lPush('build-queue', id);
         resp.json({ status: 'success', id });
     } catch (error) {
         console.error('Failed to deploy the project');
@@ -58,9 +60,10 @@ app.get('/status', async (req, res) => {
     const id = req.query.id;
     const statusResponse = await subscriber.hGet('status', id as string);
     res.json({
-        statusResponse
+        status: statusResponse
     });
 });
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 console.log('Server Started!');
 app.listen(3000);

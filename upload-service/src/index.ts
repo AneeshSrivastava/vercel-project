@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 app.post('/deploy', async (req, resp) => {
-    try{
+    try {
         const repoUrl = req.body.repoUrl;
         console.log(repoUrl);
         const id = generate();
@@ -27,15 +27,15 @@ app.post('/deploy', async (req, resp) => {
         await uploadFilesToS3(files);
         publisher.lPush('build-queue', id);
         console.log(`Pushed '${id}' to redis`);
-        resp.json({ status: 'success',id });
-    }catch(error){
-        console.error("Failed to deploy the project")
+
+        resp.json({ status: 'success', id });
+    } catch (error) {
+        console.error('Failed to deploy the project');
         resp.json({
             status: 'failed',
             message: 'Failed while processing deployment'
         });
     }
-    
 });
 
 app.delete('/cleanup', async (req, resp) => {

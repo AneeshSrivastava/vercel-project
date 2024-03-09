@@ -11,6 +11,7 @@ publisher.connect();
 
 async function main() {
     while (1) {
+        console.log('Waiting...');
         const response = await subscriber.brPop(
             commandOptions({ isolated: true }),
             'build-queue',
@@ -24,6 +25,7 @@ async function main() {
             console.log('Download Completed.');
         } else {
             console.error('Could not download the folder');
+            continue;
         }
         console.log('Starting to build the project...');
         await buildProject(id);

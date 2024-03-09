@@ -27,7 +27,7 @@ app.post('/deploy', async (req, resp) => {
         await uploadFilesToS3(files);
         publisher.lPush('build-queue', id);
         console.log(`Pushed '${id}' to redis`);
-
+        publisher.hSet('status', id, 'uploaded');
         resp.json({ status: 'success', id });
     } catch (error) {
         console.error('Failed to deploy the project');

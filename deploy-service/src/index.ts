@@ -6,6 +6,9 @@ import { copyDistToS3 } from './helpers/copyDistToS3';
 const subscriber = createClient();
 subscriber.connect();
 
+const publisher = createClient();
+publisher.connect();
+
 async function main() {
     while (1) {
         const response = await subscriber.brPop(
@@ -26,6 +29,7 @@ async function main() {
         await buildProject(id);
         console.log('Starting to upload dist files to S3');
         await copyDistToS3(id);
+        publisher.hSet('status', id, 'deployed');
     }
 }
 
